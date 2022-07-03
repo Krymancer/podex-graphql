@@ -1,0 +1,20 @@
+type Pokemon {
+  id: Int
+  identifier: String
+  height: Int
+  weight: Int
+  base_experience: Int
+  types: [PokemonType]
+}
+
+type PokemonType {
+  id: Int
+  identifier: String
+}
+
+type Query {
+  pokemons: [Pokemon]!
+  pokemon(id: Int): Pokemon!
+  pokemonsByType(type: String): [Pokemon]!
+  pokemonByIdentifier(identifier: String): Pokemon!
+}
