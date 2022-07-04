@@ -1,20 +1,31 @@
 type Pokemon {
   id: Int
-  identifier: String
+  name: String
   height: Int
   weight: Int
-  base_experience: Int
-  types: [PokemonType]
-}
-
-type PokemonType {
-  id: Int
-  identifier: String
+  base_xp: Int
+  species: String
+  types: String
 }
 
 type Query {
   pokemons: [Pokemon]!
   pokemon(id: Int): Pokemon!
-  pokemonsByType(type: String): [Pokemon]!
-  pokemonByIdentifier(identifier: String): Pokemon!
+  pokemonsByType(type: String!): [Pokemon]!
+  pokemonByName(name: String!): Pokemon!
+}
+
+input PokemonInput {
+  name: String
+  height: Int
+  weight: Int
+  base_xp: Int
+  species: String
+  types: String 
+}
+
+type Mutation {
+  createPokemon(input: PokemonInput): Pokemon!
+  updatePokemon(id: Int, input: PokemonInput): Pokemon!
+  deletePokemon(id: Int): Pokemon!
 }

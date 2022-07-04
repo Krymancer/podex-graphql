@@ -1,94 +1,75 @@
 import {GraphQLContext} from '../../context';
-
-function includeType(pokemon: any) {
-  const types = pokemon.pokemon_types.map((pokemonType: any) => {
-    return pokemonType.types;
-  });
-
-  return {
-    ...pokemon,
-    types,
-  };
-}
-
-function includeTypes(pokemons: any) {
-  return pokemons.map(includeType);
-}
+import {PokemonInput, PokemonArguments} from '../resolvers/pokemon';
 
 async function getAll(context: GraphQLContext) {
-  const pokemons = await context.prisma.pokemon.findMany({
-    include: {
-      pokemon_types: {
-        include: {
-          types: true,
-        },
-      },
-    },
-  });
-
-  return includeTypes(pokemons);
+  return await context.prisma.pokemon.findMany({});
 }
 
 async function getById(id: number, context: GraphQLContext) {
-  const pokemon = await context.prisma.pokemon.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      pokemon_types: {
-        include: {
-          types: true,
-        },
-      },
-    },
+  return await context.prisma.pokemon.findUnique({
+    where: {id},
   });
-
-  return includeType(pokemon);
 }
 
-async function getByIdentifier(name: string, context: GraphQLContext) {
-  const pokemon = await context.prisma.pokemon.findFirst({
-    where: {
-      identifier: name,
-    },
-    include: {
-      pokemon_types: {
-        include: {
-          types: true,
-        },
-      },
-    },
+async function getByName(name: string, context: GraphQLContext) {
+  return await context.prisma.pokemon.findFirst({
+    where: {name},
   });
-
-  return includeType(pokemon);
 }
 
 async function getByType(type: string, context: GraphQLContext) {
-  const pokemons = await context.prisma.pokemon.findMany({
+  return await context.prisma.pokemon.findMany({
     where: {
-      pokemon_types: {
-        some: {
-          types: {
-            identifier: type,
-          },
-        },
+      types: {
+        contains: type,
       },
-    },
-    include: {
-      pokemon_types: {
-        include: {
-          types: true,
-        },
-      },
+    }});
+}
+
+async function createPokemon(input: PokemonInput, context : GraphQLContext) {
+  return await context.prisma.pokemon.create({
+    data: {
+      name: input.name,
+      weight: input.weight,
+      height: input.height,
+      base_xp: input.base_xp,
+      types: input.types,
     },
   });
+}
 
-  return includeTypes(pokemons);
+async function removePokemon(id: number, context : GraphQLContext) {
+  return await context.prisma.pokemon.delete({
+    where: {
+      id,
+    },
+  });
+}
+
+async function updatePokemon(
+    args: PokemonArguments,
+    context : GraphQLContext) {
+  const {id, input} = args;
+  return await context.prisma.pokemon.update({
+    where: {
+      id,
+    },
+    data: {
+      name: input.name,
+      weight: input.weight,
+      height: input.height,
+      base_xp: input.base_xp,
+      types: input.types,
+    },
+  });
 }
 
 export default {
   getAll,
   getById,
-  getByIdentifier,
+  getByName,
   getByType,
+  createPokemon,
+  removePokemon,
+  updatePokemon,
 };
