@@ -29,3 +29,7 @@ type Mutation {
   updatePokemon(id: Int, input: PokemonInput): Pokemon!
   deletePokemon(id: Int): Pokemon!
 }
+
+type Subscription {
+  pokemonCreated: Pokemon
+}

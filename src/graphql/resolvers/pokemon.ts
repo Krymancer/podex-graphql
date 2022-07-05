@@ -1,5 +1,9 @@
+import {createPubSub} from '@graphql-yoga/node';
 import {GraphQLContext} from '../../context';
 import services from '../services';
+
+const pokeSub = createPubSub();
+
 
 type Args = {
   id: number;
@@ -28,9 +32,18 @@ const pokemonResolver = {
     pokemonsByType: async (parent: unknown, args: PokemonArguments, context : GraphQLContext) => await services.pokemonService.getByType(args.type, context),
   },
   Mutation: {
-    createPokemon: async (parent: unknown, args: PokemonArguments, context : GraphQLContext) => await services.pokemonService.createPokemon(args.input, context),
+    createPokemon: async (parent: unknown, args: PokemonArguments, context : GraphQLContext) => {
+      const pokemon = await services.pokemonService.createPokemon(args.input, context);
+      pokeSub.publish('pokemonCreated', {pokemonCreated: pokemon});
+      return pokemon;
+    },
     deletePokemon: async (parent: unknown, args: PokemonArguments, context : GraphQLContext) => await services.pokemonService.removePokemon(args.id, context),
     updatePokemon: async (parent: unknown, args: PokemonArguments, context : GraphQLContext) => await services.pokemonService.updatePokemon(args, context),
+  },
+  Subscription: {
+    pokemonCreated: {
+      subscribe: () => pokeSub.subscribe('pokemonCreated'),
+    },
   },
 };
 
