@@ -1,10 +1,22 @@
 import {createServer} from '@graphql-yoga/node';
-import {schema} from './schema';
-import {createContext} from './context';
+import {makeExecutableSchema} from '@graphql-tools/schema';
+
+const typeDefs = /* GraphQL */ `
+  type Query {
+    hello: String!
+  }
+`;
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello World!',
+  },
+};
+
+const schema = makeExecutableSchema({typeDefs, resolvers});
 
 async function main() {
-  const context = await createContext();
-  const server = createServer({schema, context});
+  const server = createServer({schema});
   server.start();
 }
 
